@@ -2,7 +2,7 @@
 using namespace std;
 
 enum Piece {PAWN,KNIGHT,BISHOP,ROOK,QUEEN,KING,EMPTY};
-enum Color {WHITE,BLACK};
+enum Color {WHITE,BLACK,NO_COLOR};
 
 struct Board {
     Color currentColor=WHITE;
@@ -10,25 +10,28 @@ struct Board {
     bool whiteLongCastle=true;
     bool blackShortCastle=true;
     bool blackLongCastle=true;
+    int enpassant;
+    int kingPos[2]={4,60};
     int piece[64] = {
-        ROOK,  KNIGHT,BISHOP,QUEEN, KING,  BISHOP,KNIGHT,ROOK,
-        PAWN,  PAWN,  PAWN,  PAWN,  PAWN,  PAWN,  PAWN,  PAWN,
-        EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-        EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-        EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-        EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-        PAWN,  PAWN,  PAWN,  PAWN,  PAWN,  PAWN,  PAWN,  PAWN,
-        ROOK,  KNIGHT,BISHOP,QUEEN, KING,  BISHOP,KNIGHT,ROOK
+        ROOK,  KNIGHT, BISHOP, QUEEN, KING,  BISHOP, KNIGHT, ROOK,
+        PAWN,  PAWN,   PAWN,   PAWN,  PAWN,  PAWN,   PAWN,   PAWN,
+        EMPTY, EMPTY,  EMPTY,  EMPTY, EMPTY, EMPTY,  EMPTY,  EMPTY,
+        EMPTY, EMPTY,  EMPTY,  EMPTY, EMPTY, EMPTY,  EMPTY,  EMPTY,
+        EMPTY, EMPTY,  EMPTY,  EMPTY, EMPTY, EMPTY,  EMPTY,  EMPTY,
+        EMPTY, EMPTY,  EMPTY,  EMPTY, EMPTY, EMPTY,  EMPTY,  EMPTY,
+        PAWN,  PAWN,   PAWN,   PAWN,  PAWN,  PAWN,   PAWN,   PAWN,
+        ROOK,  KNIGHT, BISHOP, QUEEN, KING,  BISHOP, KNIGHT, ROOK
     };
+
     int color[64] = {
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
-        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
-        EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-        EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-        EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
-        EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY, EMPTY,
         WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,
-        WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE
+        WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE, WHITE,
+        NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR,
+        NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR,
+        NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR,
+        NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR, NO_COLOR,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK,
+        BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK, BLACK
     };
 };
 
@@ -119,23 +122,9 @@ void undoMove(Board& board,int from,int to,int p) {
     board.piece[to]=p;
     board.currentColor=(Color)(1-board.currentColor);
 }
-bool inCheck(Board& board,Color color) {
-    int r=-1;
-    int c=-1;
-    bool found=false;
-    for (int row=0;row<8;row++) {
-        for (int col=0;col<8;col++) {
-            int i=8*row+col;
-            if (board.piece[i]==KING&&board.color[i]==color) {
-                r=row;
-                c=col;
-                found=true;
-                break;
-            }
-        }
-        if (found) break;
-    }
-    if (!found) return false;
+bool isAttacked(Board& board,Color color,int position) {
+    int r=position/8;
+    int c=position%8;
     for (auto [dr,dc]:directions[KNIGHT]) {
         int nr=r+dr;
         int nc=c+dc;
@@ -168,7 +157,7 @@ bool inCheck(Board& board,Color color) {
             break;
         }
     }
-    int forward = (color==WHITE ? -1 : 1);
+    int forward = (color==WHITE ? 1 : -1);
     for (int dc : {-1, 1}) {
         int nr = r+forward, nc = c+dc;
         if (!inBoard(nr,nc)) continue;
@@ -192,12 +181,11 @@ void addMove(Board& board,int from,int to,bool castle,bool enpassant) {
     if (board.piece[to]!=EMPTY) flag|=FLAG_CAPTURE;
     if (castle) flag|=FLAG_CASTLE;
     if (enpassant) flag|=FLAG_EN_PASSANT;
-    bool promo=p==PAWN && board.color[from]==WHITE && 63-to<=7 || p==PAWN && board.color[from]==BLACK && 7-to<=7;
+    bool promo=p==PAWN && board.color[from]==WHITE && to>=56 || p==PAWN && board.color[from]==BLACK && to<=7;
     p=board.piece[to];
     Color currentColor=board.currentColor;
     makeMove(board,from,to,enpassant,castle);
-
-    if (!inCheck(board,currentColor)) {
+    if (!isAttacked(board,currentColor,board.kingPos[currentColor])) {
         if (promo) {
             for (int i=1;i<=4;i++) {
                 moves.push_back(make_move(from,to,i,flag));
@@ -220,10 +208,71 @@ void moveGenerator(Board& board) {
                     for (auto [dr,dc]:directions[piece]) {
                         for (int step=1;step<=(isSliding[piece]?7:1);step++) {
                             int nr=r+step*dr;
-                            int nc=r+step*dc;
+                            int nc=c+step*dc;
                             if (!inBoard(nr,nc)) break;
-                            if ()
+                            int j=nr*8+nc;
+                            if (board.color[j]==NO_COLOR) {
+                                addMove(board,i,j,false,false);
+                            }
+                            else{
+                                if (board.color[j]!=board.currentColor)
+                                    addMove(board,i,j,false,false);
+                                break;
+                            }
                         }
+                    }
+                }
+                if (piece==KING) {
+                    if (isAttacked(board,(Color)board.color[i],i)) continue;
+                    if (board.color[i]==WHITE) {
+                        if (board.whiteShortCastle) {
+                            if (board.piece[6]==EMPTY&&board.piece[5]==EMPTY&&!isAttacked(board,WHITE,6)&&!isAttacked(board,WHITE,5))
+                                addMove(board,4,6,true,false);
+                        }
+                        if (board.whiteLongCastle) {
+                            if (board.piece[1]==EMPTY&&board.piece[2]==EMPTY&&board.piece[3]==EMPTY&&!isAttacked(board,WHITE,3)&&!isAttacked(board,WHITE,2)&&!isAttacked(board,WHITE,1))
+                                addMove(board,4,2,true,false);
+                        }
+                    }else {
+                        if (board.blackShortCastle) {
+                            if (board.piece[61]==EMPTY&&board.piece[62]==EMPTY&&!isAttacked(board,BLACK,61)&&!isAttacked(board,BLACK,62))
+                                addMove(board,60,62,true,false);
+                        }
+                        if (board.blackLongCastle) {
+                            if (board.piece[57]==EMPTY&&board.piece[58]==EMPTY&&board.piece[59]==EMPTY&&!isAttacked(board,BLACK,57)&&!isAttacked(board,BLACK,58)&&!isAttacked(board,BLACK,59))
+                                addMove(board,60,58,true,false);
+                        }
+                    }
+                }
+                if (piece==PAWN) {
+                    int forward=(board.color[i]==WHITE? 1:-1);
+                    int startRank=(board.color[i]==WHITE? 1:6);
+                    int nr=r+forward;
+                    int nc=c;
+                    if (inBoard(nr,nc)) {
+                        int j=nr*8+nc;
+                        if (board.piece[j]==EMPTY) {
+                            addMove(board,i,j,false,false);
+                        }
+                    }
+                    if (r==startRank) {
+                        nr=r+forward*2;
+                        if (inBoard(nr,nc)) {
+                            int j=nr*8+nc;
+                            int nj=(nr-forward)*8+nc;
+                            if (board.piece[j]==EMPTY&&board.piece[nj]==EMPTY) {
+                                addMove(board,i,j,false,false);
+                            }
+                        }
+                    }
+                    for (int dc : {-1, 1}) {
+                        nr = r+forward,nc=c+dc;
+                        if (!inBoard(nr,nc)) continue;
+                        int j = 8*nr + nc;
+                        if (board.color[j]!=board.color[i]&&board.piece[j]!=EMPTY)
+                            addMove(board,i,j,false,false);
+                        if (board.enpassant==j)
+                            addMove(board,i,j,false,true);
                     }
                 }
             }
