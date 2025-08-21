@@ -103,7 +103,7 @@ void makeMove(Board& board,Move& move) {
     h.captured=(Piece)board.piece[move.to];
     h.prevEnpassant=board.enpassant;
     h.captureSquare=move.to;
-    if (!move.flags&(FLAG_CAPTURE)) h.captureSquare=-1;
+    if (!(move.flags&(FLAG_CAPTURE))) h.captureSquare=-1;
     h.move=move;
     h.castlingRights=board.castlingRights;
     h.halfMoveClock=board.halfMoveClock;
@@ -153,11 +153,11 @@ void makeMove(Board& board,Move& move) {
 
     if (move.from==0||move.to==0)
         board.castlingRights&=13;
-    else if (move.from==7||move.to==7)
+    if (move.from==7||move.to==7)
         board.castlingRights&=14;
-    else if (move.from==56||move.to==56)
+    if (move.from==56||move.to==56)
         board.castlingRights&=7;
-    else if (move.from==63||move.to==63)
+    if (move.from==63||move.to==63)
         board.castlingRights&=11;
 
 
@@ -266,7 +266,10 @@ void addMove(Board& board,int from,int to,int promo,bool castle,bool enpassant) 
     uint8_t flag=0;
     if (board.piece[to]!=EMPTY) flag|=FLAG_CAPTURE;
     if (castle) flag|=FLAG_CASTLE;
-    if (enpassant) flag|=FLAG_EN_PASSANT;
+    if (enpassant) {
+        flag|=FLAG_EN_PASSANT;
+        flag|=FLAG_CAPTURE;
+    }
     Color currentColor=board.currentColor;
     Move move=make_move(from,to,promo,flag);
     makeMove(board,move);
@@ -308,7 +311,7 @@ void moveGenerator(Board& board) {
                                 addMove(board,4,6,0,true,false);
                         }
                         if (board.castlingRights&(1<<1)) {
-                            if (board.piece[1]==EMPTY&&board.piece[2]==EMPTY&&board.piece[3]==EMPTY&&!isAttacked(board,WHITE,3)&&!isAttacked(board,WHITE,2)&&!isAttacked(board,WHITE,1))
+                            if (board.piece[1]==EMPTY&&board.piece[2]==EMPTY&&board.piece[3]==EMPTY&&!isAttacked(board,WHITE,3)&&!isAttacked(board,WHITE,2))
                                 addMove(board,4,2,0,true,false);
                         }
                     }else {
@@ -317,7 +320,7 @@ void moveGenerator(Board& board) {
                                 addMove(board,60,62,0,true,false);
                         }
                         if (board.castlingRights&(1<<3)) {
-                            if (board.piece[57]==EMPTY&&board.piece[58]==EMPTY&&board.piece[59]==EMPTY&&!isAttacked(board,BLACK,57)&&!isAttacked(board,BLACK,58)&&!isAttacked(board,BLACK,59))
+                            if (board.piece[57]==EMPTY&&board.piece[58]==EMPTY&&board.piece[59]==EMPTY&&!isAttacked(board,BLACK,58)&&!isAttacked(board,BLACK,59))
                                 addMove(board,60,58,0,true,false);
                         }
                     }
@@ -371,6 +374,111 @@ void moveGenerator(Board& board) {
         }
     }
 }
+long long perft(Board& board, int depth) {
+    // Base case: If we're at the desired depth, we count this position as one "leaf node".
+    if (depth == 0) {
+        return 1;
+    }
+
+    moves.clear(); // Clear the global moves vector for the new position
+    moveGenerator(board);
+
+    long long nodes = 0;
+
+    // It's safer to copy the generated moves to a local variable
+    // in case the global 'moves' vector is modified in deeper recursive calls.
+    vector<Move> currentMoves = moves;
+
+    for (Move& move : currentMoves) {
+        makeMove(board, move);
+        nodes += perft(board, depth - 1); // Recursively call for the next depth
+        unmakeMove(board); // Backtrack to the original position
+    }
+
+    return nodes;
+}
+void setBoard(Board& board, const string& fen) {
+    // 1. Clear the existing board state
+    for (int i = 0; i < 64; ++i) {
+        board.piece[i] = EMPTY;
+        board.color[i] = NO_COLOR;
+    }
+    board.history.clear();
+    board.castlingRights = 0;
+    board.enpassant = -1;
+    board.halfMoveClock = 0;
+
+    // Use a stringstream for easy parsing
+    stringstream ss(fen);
+    string field;
+
+    // Field 1: Piece Placement
+    ss >> field;
+    int rank = 7, file = 0;
+    map<char, Piece> pieceMap = {
+        {'p', PAWN}, {'n', KNIGHT}, {'b', BISHOP}, {'r', ROOK}, {'q', QUEEN}, {'k', KING}
+    };
+
+    for (char c : field) {
+        if (c == '/') {
+            rank--;
+            file = 0;
+        } else if (isdigit(c)) {
+            file += (c - '0');
+        } else {
+            int square = rank * 8 + file;
+            Color pieceColor = isupper(c) ? WHITE : BLACK;
+            Piece pieceType = pieceMap[tolower(c)];
+
+            board.piece[square] = pieceType;
+            board.color[square] = pieceColor;
+
+            if (pieceType == KING) {
+                board.kingPos[pieceColor] = square;
+            }
+            file++;
+        }
+    }
+
+    // Field 2: Active Color
+    ss >> field;
+    board.currentColor = (field == "w") ? WHITE : BLACK;
+
+    // Field 3: Castling Availability
+    ss >> field;
+    if (field != "-") {
+        for (char c : field) {
+            if (c == 'K') board.castlingRights |= (1 << 0);
+            if (c == 'Q') board.castlingRights |= (1 << 1);
+            if (c == 'k') board.castlingRights |= (1 << 2);
+            if (c == 'q') board.castlingRights |= (1 << 3);
+        }
+    }
+
+    // Field 4: En Passant Target Square
+    ss >> field;
+    if (field != "-") {
+        int epFile = field[0] - 'a';
+        int epRank = field[1] - '1';
+        board.enpassant = epRank * 8 + epFile;
+    } else {
+        board.enpassant = -1;
+    }
+
+    // Field 5: Halfmove Clock
+    if (ss >> field) {
+        board.halfMoveClock = stoi(field);
+    } else {
+        board.halfMoveClock = 0;
+    }
+
+    // Field 6: Fullmove Number (not stored in your struct, so we can ignore it)
+    // ss >> field;
+}
+
+
 int main() {
     Board board;
+
+
 }
