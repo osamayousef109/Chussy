@@ -15,6 +15,10 @@ inline void makeMove(Board& board,Move move) {
     h.captured=board.mailbox[to];
     h.prevEnpassant=board.enpassant;
     h.captureSquare=to;
+    h.zobristKey=board.zobristKey;
+    if (board.ep_is_capturable(board.enpassant, color)) {
+        board.zobristKey ^= board.enpassantFile[board.enpassant & 7];
+    }
     if (!(flag&FLAG_CAPTURE)) h.captureSquare=-1;
     h.move=move;
     h.castlingRights=board.castlingRights;
@@ -24,6 +28,7 @@ inline void makeMove(Board& board,Move move) {
     if (flag&(FLAG_CAPTURE)&&!(flag&FLAG_EN_PASSANT)) {
         board.piece[enemy][h.captured]&=~(toBB);
         board.occupied[enemy]&=~(toBB);
+        board.zobristKey^=board.pieceKey[enemy][h.captured][to];
     }
     board.mailbox[to]=piece;
     board.mailbox[from]=EMPTY;
@@ -33,6 +38,8 @@ inline void makeMove(Board& board,Move move) {
     board.piece[color][piece]|=toBB;
     board.allOccupied|=toBB;
     board.occupied[color]|=toBB;
+    board.zobristKey^=board.pieceKey[color][piece][from];
+    board.zobristKey^=board.pieceKey[color][piece][to];
     if (flag&(FLAG_EN_PASSANT)) {
         int back=(color==WHITE? -8:8);
         back+=to;
@@ -43,6 +50,7 @@ inline void makeMove(Board& board,Move move) {
         board.allOccupied&=~backBB;
         board.piece[enemy][PAWN]&=~backBB;
         board.occupied[enemy]&=~backBB;
+        board.zobristKey^=board.pieceKey[enemy][PAWN][back];
     }
     if (flag&(FLAG_CASTLE)) {
         if (to>from) {
@@ -58,6 +66,8 @@ inline void makeMove(Board& board,Move move) {
             board.allOccupied|=finBB;
             board.occupied[color]&=~endBB;
             board.occupied[color]|=finBB;
+            board.zobristKey^=board.pieceKey[color][ROOK][end];
+            board.zobristKey^=board.pieceKey[color][ROOK][end-2];
         }else {
             int end=0;
             if (color) end=56;
@@ -71,17 +81,22 @@ inline void makeMove(Board& board,Move move) {
             board.allOccupied|=finBB;
             board.occupied[color]&=~endBB;
             board.occupied[color]|=finBB;
+            board.zobristKey^=board.pieceKey[color][ROOK][end];
+            board.zobristKey^=board.pieceKey[color][ROOK][end+3];
         }
     }
     if (promo) {
         board.mailbox[to]=promo;
         board.piece[color][piece]&=~toBB;
         board.piece[color][promo]|=toBB;
+        board.zobristKey^=board.pieceKey[color][piece][to];
+        board.zobristKey^=board.pieceKey[color][promo][to];
     }
     if (piece!=PAWN&&!(flag&(FLAG_CAPTURE)))
         board.halfMoveClock++;
     else
         board.halfMoveClock=0;
+    board.zobristKey ^= board.castleKey[board.castlingRights];
     if (piece==KING) {
         if (color==WHITE)
             board.castlingRights&=12;
@@ -89,7 +104,6 @@ inline void makeMove(Board& board,Move move) {
             board.castlingRights&=3;
         board.kingPos[color]=to;
     }
-
     if (from==0||to==0)
         board.castlingRights&=13;
     if (from==7||to==7)
@@ -98,15 +112,17 @@ inline void makeMove(Board& board,Move move) {
         board.castlingRights&=7;
     if (from==63||to==63)
         board.castlingRights&=11;
-
-
+    board.zobristKey^=board.castleKey[board.castlingRights];
     if (piece==PAWN&&abs(to/8-from/8)==2) {
         int back=(board.currentColor==WHITE? -8:8);
         board.enpassant=to+back;
     }else
         board.enpassant=-1;
+    if (board.ep_is_capturable(board.enpassant,enemy))
+        board.zobristKey^=board.enpassantFile[board.enpassant&7];
     history[historyIdx++]=h;
     board.empty = ~board.allOccupied;
+    board.zobristKey^=board.colorKey;
     board.currentColor=(Color)(1-board.currentColor);
 }
 inline void unmakeMove(Board& board) {
@@ -176,6 +192,7 @@ inline void unmakeMove(Board& board) {
         board.piece[color][PAWN]|=fromBB;
     }
     board.empty=~board.allOccupied;
+    board.zobristKey=h.zobristKey;
     board.currentColor=(Color)(1-board.currentColor);
 }
 inline void addMove(Board& board,int from,int to,int promo,bool castle,bool enpassant) {

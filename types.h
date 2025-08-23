@@ -20,6 +20,7 @@ struct History {
     int prevEnpassant;
     int captureSquare;
     int halfMoveClock;
+    U64 zobristKey;
 };
 inline Move make_move(int from,int to,int promo=0,int flags=0) {
     return (from) | (to << 6) | (promo << 12) | (flags << 16);

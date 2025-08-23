@@ -5,10 +5,11 @@
 #include "bitboards.h"
 
 #include <iostream>
+#include <random>
 
 #include "types.h"
 #include "magic.h"
-U64 attack_table[107648]; // ~840 KiB all rook and bishop attacks, less with constructive collisions optimization
+U64 attack_table[107648];// ~840 KiB all rook and bishop attacks, less with constructive collisions optimization
 void initMagic() {
     U64* ptr = attack_table;
     for (int sq = 0; sq < 64; ++sq) {

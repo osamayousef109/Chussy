@@ -1,6 +1,7 @@
 
 #ifndef BITBOARDS_H
 #define BITBOARDS_H
+#include <random>
 #include <sstream>
 #include <string>
 
@@ -12,6 +13,15 @@ struct SMagic {
     U64 magic; // magic 64-bit factor
     int shift; // shift right
 };
+inline uint64_t random_uint64() {
+    static std::random_device rd;
+    static std::mt19937_64 gen(rd());
+    static std::uniform_int_distribution<uint64_t> dist(
+        0, std::numeric_limits<uint64_t>::max()
+    );
+    return dist(gen);
+}
+
 inline SMagic mBishopTbl[64];
 inline SMagic mRookTbl[64];
 constexpr U64 bishopAttacks(int sq,U64 occ) {
@@ -78,6 +88,11 @@ struct Board {
     U64 occupied[2];
     U64 allOccupied;
     U64 empty;
+    U64 zobristKey=0;
+    U64 pieceKey[2][6][64];
+    U64 castleKey[16];
+    U64 enpassantFile[8];
+    U64 colorKey;
     int kingPos[2]{4,60};
     int mailbox[64] = {
         ROOK,  KNIGHT, BISHOP, QUEEN, KING,  BISHOP, KNIGHT, ROOK,
@@ -178,6 +193,51 @@ struct Board {
         occupied[BLACK] = piece[BLACK][PAWN] | piece[BLACK][KNIGHT] | piece[BLACK][BISHOP] | piece[BLACK][ROOK] | piece[BLACK][QUEEN] | piece[BLACK][KING];
         allOccupied = occupied[WHITE] | occupied[BLACK];
         empty=~allOccupied;
+        for (auto & i : pieceKey) {
+            for (auto & j : i) {
+                for (unsigned long long & k : j) {
+                    k=random_uint64();
+                }
+            }
+        }
+        for (U64& i : castleKey) {
+            i=random_uint64();
+        }
+        for (U64& i : enpassantFile) {
+            i=random_uint64();
+        }
+        colorKey=random_uint64();
+    }
+    bool ep_is_capturable(int enpassantSq, int sideToMove) {
+        if (enpassantSq==-1) return false;
+        int file = enpassantSq&7;
+        U64 mask = 0;
+        if (sideToMove == WHITE) {
+            if (file > 0) mask |= 1ULL << (enpassantSq - 9);
+            if (file < 7) mask |= 1ULL << (enpassantSq - 7);
+            return piece[WHITE][PAWN] & mask;
+        } else {
+            if (file > 0) mask |= 1ULL << (enpassantSq + 7);
+            if (file < 7) mask |= 1ULL << (enpassantSq + 9);
+            return piece[BLACK][PAWN] & mask;
+        }
+    }
+    void initZobrist() {
+        for (int color=0;color<2;color++) {
+            for (int p=0;p<6;p++) {
+                U64 bb=piece[color][p];
+                while (bb) {
+                    int sq=__builtin_ctzll(bb);
+                    bb&=bb-1;
+                    zobristKey^=pieceKey[color][p][sq];
+                }
+            }
+        }
+        zobristKey^=castleKey[castlingRights];
+        if (ep_is_capturable(enpassant,currentColor))
+            zobristKey^=enpassantFile[enpassant&7];
+        if (currentColor==WHITE)
+            zobristKey^=colorKey;
     }
 };
 inline bool isAttacked(Board& board,int color,int sq) {

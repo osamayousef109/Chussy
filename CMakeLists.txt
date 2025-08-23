@@ -14,6 +14,8 @@ add_executable(ChessEngine main.cpp
         movegen.h
         test.cpp
         test.h
+        TT.cpp
+        TT.h
 )
 
 target_compile_options(ChessEngine PRIVATE -O3 -march=native -flto -fno-exceptions -ffast-math)
