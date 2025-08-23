@@ -8,6 +8,399 @@ constexpr uint8_t FLAG_CASTLE    = 1 << 2;
 constexpr uint8_t FLAG_PROMOTION = 1 << 3;
 enum Piece {PAWN,KNIGHT,BISHOP,ROOK,QUEEN,KING,EMPTY};
 enum Color {WHITE,BLACK,NO_COLOR};
+
+
+const U64 RMagic[64] = {
+  0x80004000976080ULL,
+  0x1040400010002000ULL,
+  0x4880200210000980ULL,
+  0x5280080010000482ULL,
+  0x200040200081020ULL,
+  0x2100080100020400ULL,
+  0x4280008001000200ULL,
+  0x1000a4425820300ULL,
+  0x29002100800040ULL,
+  0x4503400040201004ULL,
+  0x209002001004018ULL,
+  0x1131000a10002100ULL,
+  0x9000800120500ULL,
+  0x10e001804820010ULL,
+  0x29000402000100ULL,
+  0x2002000d01c40292ULL,
+  0x80084000200c40ULL,
+  0x10004040002002ULL,
+  0x201030020004014ULL,
+  0x80012000a420020ULL,
+  0x129010008001204ULL,
+  0x6109010008040002ULL,
+  0x950010100020004ULL,
+  0x803a0000c50284ULL,
+  0x80004100210080ULL,
+  0x200240100140ULL,
+  0x20004040100800ULL,
+  0x4018090300201000ULL,
+  0x4802010a00102004ULL,
+  0x2001000900040002ULL,
+  0x4a02104001002a8ULL,
+  0x2188108200204401ULL,
+  0x40400020800080ULL,
+  0x880402000401004ULL,
+  0x10040800202000ULL,
+  0x604410a02001020ULL,
+  0x200200206a001410ULL,
+  0x86000400810080ULL,
+  0x428200040600080bULL,
+  0x2001000041000082ULL,
+  0x80002000484000ULL,
+  0x210002002c24000ULL,
+  0x401a200100410014ULL,
+  0x5021000a30009ULL,
+  0x218000509010010ULL,
+  0x4000400410080120ULL,
+  0x20801040010ULL,
+  0x29040040820011ULL,
+  0x4080400024800280ULL,
+  0x500200040100440ULL,
+  0x2880142001004100ULL,
+  0x412020400a001200ULL,
+  0x18c028004080080ULL,
+  0x884001020080401ULL,
+  0x210810420400ULL,
+  0x801048745040200ULL,
+  0x4401002040120082ULL,
+  0x408200210012ULL,
+  0x110008200441ULL,
+  0x2010002004100901ULL,
+  0x801000800040211ULL,
+  0x480d000400820801ULL,
+  0x820104201280084ULL,
+  0x1001040311802142ULL,
+};
+
+const U64 BMagic[64] = {
+  0x1024b002420160ULL,
+  0x1008080140420021ULL,
+  0x2012080041080024ULL,
+  0xc282601408c0802ULL,
+  0x2004042000000002ULL,
+  0x12021004022080ULL,
+  0x880414820100000ULL,
+  0x4501002211044000ULL,
+  0x20402222121600ULL,
+  0x1081088a28022020ULL,
+  0x1004c2810851064ULL,
+  0x2040080841004918ULL,
+  0x1448020210201017ULL,
+  0x4808110108400025ULL,
+  0x10504404054004ULL,
+  0x800010422092400ULL,
+  0x40000870450250ULL,
+  0x402040408080518ULL,
+  0x1000980a404108ULL,
+  0x1020804110080ULL,
+  0x8200c02082005ULL,
+  0x40802009a0800ULL,
+  0x1000201012100ULL,
+  0x111080200820180ULL,
+  0x904122104101024ULL,
+  0x4008200405244084ULL,
+  0x44040002182400ULL,
+  0x4804080004021002ULL,
+  0x6401004024004040ULL,
+  0x404010001300a20ULL,
+  0x428020200a20100ULL,
+  0x300460100420200ULL,
+  0x404200c062000ULL,
+  0x22101400510141ULL,
+  0x104044400180031ULL,
+  0x2040040400280211ULL,
+  0x8020400401010ULL,
+  0x20100110401a0040ULL,
+  0x100101005a2080ULL,
+  0x1a008300042411ULL,
+  0x120a025004504000ULL,
+  0x4001084242101000ULL,
+  0xa020202010a4200ULL,
+  0x4000002018000100ULL,
+  0x80104000044ULL,
+  0x1004009806004043ULL,
+  0x100401080a000112ULL,
+  0x1041012101000608ULL,
+  0x40400c250100140ULL,
+  0x80a10460a100002ULL,
+  0x2210030401240002ULL,
+  0x6040aa108481b20ULL,
+  0x4009004050410002ULL,
+  0x8106003420200e0ULL,
+  0x1410500a08206000ULL,
+  0x92548802004000ULL,
+  0x1040041241028ULL,
+  0x120042025011ULL,
+  0x8060104054400ULL,
+  0x20004404020a0a01ULL,
+  0x40008010020214ULL,
+  0x4000050209802c1ULL,
+  0x208244210400ULL,
+  0x10140848044010ULL,
+};
+int RBits[64] = {
+    12, 11, 11, 11, 11, 11, 11, 12,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    12, 11, 11, 11, 11, 11, 11, 12
+  };
+
+int BBits[64] = {
+    6, 5, 5, 5, 5, 5, 5, 6,
+    5, 5, 5, 5, 5, 5, 5, 5,
+    5, 5, 7, 7, 7, 7, 5, 5,
+    5, 5, 7, 9, 9, 7, 5, 5,
+    5, 5, 7, 9, 9, 7, 5, 5,
+    5, 5, 7, 7, 7, 7, 5, 5,
+    5, 5, 5, 5, 5, 5, 5, 5,
+    6, 5, 5, 5, 5, 5, 5, 6
+  };
+const U64 RMask[64] = {
+  0x000101010101017eULL, // pop=12
+  0x000202020202027cULL, // pop=11
+  0x000404040404047aULL, // pop=11
+  0x0008080808080876ULL, // pop=11
+  0x001010101010106eULL, // pop=11
+  0x002020202020205eULL, // pop=11
+  0x004040404040403eULL, // pop=11
+  0x008080808080807eULL, // pop=12
+  0x0001010101017e00ULL, // pop=11
+  0x0002020202027c00ULL, // pop=10
+  0x0004040404047a00ULL, // pop=10
+  0x0008080808087600ULL, // pop=10
+  0x0010101010106e00ULL, // pop=10
+  0x0020202020205e00ULL, // pop=10
+  0x0040404040403e00ULL, // pop=10
+  0x0080808080807e00ULL, // pop=11
+  0x00010101017e0100ULL, // pop=11
+  0x00020202027c0200ULL, // pop=10
+  0x00040404047a0400ULL, // pop=10
+  0x0008080808760800ULL, // pop=10
+  0x00101010106e1000ULL, // pop=10
+  0x00202020205e2000ULL, // pop=10
+  0x00404040403e4000ULL, // pop=10
+  0x00808080807e8000ULL, // pop=11
+  0x000101017e010100ULL, // pop=11
+  0x000202027c020200ULL, // pop=10
+  0x000404047a040400ULL, // pop=10
+  0x0008080876080800ULL, // pop=10
+  0x001010106e101000ULL, // pop=10
+  0x002020205e202000ULL, // pop=10
+  0x004040403e404000ULL, // pop=10
+  0x008080807e808000ULL, // pop=11
+  0x0001017e01010100ULL, // pop=11
+  0x0002027c02020200ULL, // pop=10
+  0x0004047a04040400ULL, // pop=10
+  0x0008087608080800ULL, // pop=10
+  0x0010106e10101000ULL, // pop=10
+  0x0020205e20202000ULL, // pop=10
+  0x0040403e40404000ULL, // pop=10
+  0x0080807e80808000ULL, // pop=11
+  0x00017e0101010100ULL, // pop=11
+  0x00027c0202020200ULL, // pop=10
+  0x00047a0404040400ULL, // pop=10
+  0x0008760808080800ULL, // pop=10
+  0x00106e1010101000ULL, // pop=10
+  0x00205e2020202000ULL, // pop=10
+  0x00403e4040404000ULL, // pop=10
+  0x00807e8080808000ULL, // pop=11
+  0x007e010101010100ULL, // pop=11
+  0x007c020202020200ULL, // pop=10
+  0x007a040404040400ULL, // pop=10
+  0x0076080808080800ULL, // pop=10
+  0x006e101010101000ULL, // pop=10
+  0x005e202020202000ULL, // pop=10
+  0x003e404040404000ULL, // pop=10
+  0x007e808080808000ULL, // pop=11
+  0x7e01010101010100ULL, // pop=12
+  0x7c02020202020200ULL, // pop=11
+  0x7a04040404040400ULL, // pop=11
+  0x7608080808080800ULL, // pop=11
+  0x6e10101010101000ULL, // pop=11
+  0x5e20202020202000ULL, // pop=11
+  0x3e40404040404000ULL, // pop=11
+  0x7e80808080808000ULL, // pop=12
+};
+
+const U64 BMask[64] = {
+  0x0040201008040200ULL, // pop=6
+  0x0000402010080400ULL, // pop=5
+  0x0000004020100a00ULL, // pop=5
+  0x0000000040221400ULL, // pop=5
+  0x0000000002442800ULL, // pop=5
+  0x0000000204085000ULL, // pop=5
+  0x0000020408102000ULL, // pop=5
+  0x0002040810204000ULL, // pop=6
+  0x0020100804020000ULL, // pop=5
+  0x0040201008040000ULL, // pop=5
+  0x00004020100a0000ULL, // pop=5
+  0x0000004022140000ULL, // pop=5
+  0x0000000244280000ULL, // pop=5
+  0x0000020408500000ULL, // pop=5
+  0x0002040810200000ULL, // pop=5
+  0x0004081020400000ULL, // pop=5
+  0x0010080402000200ULL, // pop=5
+  0x0020100804000400ULL, // pop=5
+  0x004020100a000a00ULL, // pop=7
+  0x0000402214001400ULL, // pop=7
+  0x0000024428002800ULL, // pop=7
+  0x0002040850005000ULL, // pop=7
+  0x0004081020002000ULL, // pop=5
+  0x0008102040004000ULL, // pop=5
+  0x0008040200020400ULL, // pop=5
+  0x0010080400040800ULL, // pop=5
+  0x0020100a000a1000ULL, // pop=7
+  0x0040221400142200ULL, // pop=9
+  0x0002442800284400ULL, // pop=9
+  0x0004085000500800ULL, // pop=7
+  0x0008102000201000ULL, // pop=5
+  0x0010204000402000ULL, // pop=5
+  0x0004020002040800ULL, // pop=5
+  0x0008040004081000ULL, // pop=5
+  0x00100a000a102000ULL, // pop=7
+  0x0022140014224000ULL, // pop=9
+  0x0044280028440200ULL, // pop=9
+  0x0008500050080400ULL, // pop=7
+  0x0010200020100800ULL, // pop=5
+  0x0020400040201000ULL, // pop=5
+  0x0002000204081000ULL, // pop=5
+  0x0004000408102000ULL, // pop=5
+  0x000a000a10204000ULL, // pop=7
+  0x0014001422400000ULL, // pop=7
+  0x0028002844020000ULL, // pop=7
+  0x0050005008040200ULL, // pop=7
+  0x0020002010080400ULL, // pop=5
+  0x0040004020100800ULL, // pop=5
+  0x0000020408102000ULL, // pop=5
+  0x0000040810204000ULL, // pop=5
+  0x00000a1020400000ULL, // pop=5
+  0x0000142240000000ULL, // pop=5
+  0x0000284402000000ULL, // pop=5
+  0x0000500804020000ULL, // pop=5
+  0x0000201008040200ULL, // pop=5
+  0x0000402010080400ULL, // pop=5
+  0x0002040810204000ULL, // pop=6
+  0x0004081020400000ULL, // pop=5
+  0x000a102040000000ULL, // pop=5
+  0x0014224000000000ULL, // pop=5
+  0x0028440200000000ULL, // pop=5
+  0x0050080402000000ULL, // pop=5
+  0x0020100804020000ULL, // pop=5
+  0x0040201008040200ULL, // pop=6
+};
+U64 attack_table[107648]; // ~840 KiB all rook and bishop attacks, less with constructive collisions optimization
+
+struct SMagic {
+    U64* ptr;  // pointer to attack_table for each particular square
+    U64 mask;  // to mask relevant squares of both lines (no outer squares)
+    U64 magic; // magic 64-bit factor
+    int shift; // shift right
+};
+
+SMagic mBishopTbl[64];
+SMagic mRookTbl[64];
+
+U64 bishopAttacks(int sq,U64 occ) {
+    U64* aptr = mBishopTbl[sq].ptr;
+    occ      &= mBishopTbl[sq].mask;
+    occ      *= mBishopTbl[sq].magic;
+    occ     >>= mBishopTbl[sq].shift;
+    return aptr[occ];
+}
+
+U64 rookAttacks(int sq,U64 occ) {
+    U64* aptr = mRookTbl[sq].ptr;
+    occ      &= mRookTbl[sq].mask;
+    occ      *= mRookTbl[sq].magic;
+    occ     >>= mRookTbl[sq].shift;
+    return aptr[occ];
+}
+
+inline bool inBoard(int r,int c){return r>=0&&r<8&&c>=0&&c<8;}
+int bishopDirections[4][2]={{1,1},{-1,1},{1,-1},{-1,-1}};
+int rookDirections[4][2]={{1,0},{-1,0},{0,1},{0,-1}};
+U64 bishopAttackRay(int sq,U64 occ) {
+    int r=sq/8;
+    int c=sq%8;
+    U64 out=0;
+    for (auto& m:bishopDirections) {
+        for (int step=1;step<=7;step++) {
+            int nr=r+step*m[0];
+            int nc=c+step*m[1];
+            if (!inBoard(nr,nc)) break;
+            int to=nr*8+nc;
+            out|=(1ULL<<to);
+            if ((1ULL<<to)&occ) break;
+        }
+    }
+    return out;
+}
+U64 rookAttackRay(int sq, U64 occ) {
+    int r=sq/8;
+    int c=sq%8;
+    U64 out=0;
+    for (auto& m:rookDirections) {
+        for (int step=1;step<=7;step++) {
+            int nr=r+step*m[0];
+            int nc=c+step*m[1];
+            if (!inBoard(nr,nc)) break;
+            int to=nr*8+nc;
+            out|=(1ULL<<to);
+            if ((1ULL<<to)&occ) break;
+        }
+    }
+    return out;
+}
+void initMagic() {
+    U64* ptr = attack_table;
+    for (int sq = 0; sq < 64; ++sq) {
+        int bits = RBits[sq];
+        const int tableSize = 1 << bits;
+        U64 mask = RMask[sq];
+        U64 magic = RMagic[sq];
+        mRookTbl[sq].magic = magic;
+        mRookTbl[sq].mask  = mask;
+        mRookTbl[sq].ptr   = ptr;
+        mRookTbl[sq].shift = 64 - bits;
+        for (U64 s = mask; ; s = (s - 1) & mask) {
+            U64 occ = s;
+            int idx = (int)((occ * magic) >> (64 - bits));
+            U64 att = rookAttackRay(sq, occ);
+            ptr[idx] = att;
+            if (s == 0) break;
+        }
+        ptr += tableSize;
+    }
+    for (int sq = 0; sq < 64; ++sq) {
+        int bits = BBits[sq];
+        const int tableSize = 1 << bits;
+        U64 mask = BMask[sq];
+        U64 magic = BMagic[sq];
+        mBishopTbl[sq].magic = magic;
+        mBishopTbl[sq].mask  = mask;
+        mBishopTbl[sq].ptr   = ptr;
+        mBishopTbl[sq].shift = 64 - bits;
+        for (U64 s = mask; ; s = (s - 1) & mask) {
+            U64 occ = s;
+            int idx = (int)((occ * magic) >> (64 - bits));
+            U64 att = bishopAttackRay(sq, occ);
+            ptr[idx] = att;
+            if (s == 0) break;
+        }
+        ptr += tableSize;
+    }
+}
+
+
 constexpr U64 rankMask(int r) {
     return 0xFFULL << (8*r);
 }
@@ -162,8 +555,8 @@ struct Board {
         empty=~allOccupied;
     }
 };
-Move moves[256];
-History history[256];
+Move moves[512];
+History history[512];
 int moveIdx=0;
 int historyIdx=0;
 inline Move make_move(int from,int to,int promo=0,int flags=0) {
@@ -236,50 +629,14 @@ void printBitboard(U64 bb) {
     }
     cout << "\n   a b c d e f g h\n\n";
 }
-
-inline bool inBoard(int r,int c){return r>=0&&r<8&&c>=0&&c<8;}
-int bishopDirections[4][2]={{1,1},{-1,1},{1,-1},{-1,-1}};
-int rookDirections[4][2]={{1,0},{-1,0},{0,1},{0,-1}};
-U64 bishopAttackRay(int sq,U64 occ) {
-    int r=sq/8;
-    int c=sq%8;
-    U64 out=0;
-    for (auto& m:bishopDirections) {
-        for (int step=1;step<=7;step++) {
-            int nr=r+step*m[0];
-            int nc=c+step*m[1];
-            if (!inBoard(nr,nc)) break;
-            int to=nr*8+nc;
-            out|=(1ULL<<to);
-            if ((1ULL<<to)&occ) break;
-        }
-    }
-    return out;
-}
-U64 rookAttackRay(int sq, U64 occ) {
-    int r=sq/8;
-    int c=sq%8;
-    U64 out=0;
-    for (auto& m:rookDirections) {
-        for (int step=1;step<=7;step++) {
-            int nr=r+step*m[0];
-            int nc=c+step*m[1];
-            if (!inBoard(nr,nc)) break;
-            int to=nr*8+nc;
-            out|=(1ULL<<to);
-            if ((1ULL<<to)&occ) break;
-        }
-    }
-    return out;
-}
 inline bool isAttacked(Board& board,int color,int sq) {
     int enemy=1-color;
     if (pawnAttacks[color][sq]&board.piece[enemy][PAWN]) return true;
     if (knightAttacks[sq]&board.piece[enemy][KNIGHT]) return true;
     if (kingAttacks[sq]&board.piece[enemy][KING]) return true;
-    U64 moves = bishopAttackRay(sq,board.allOccupied);
+    U64 moves = bishopAttacks(sq,board.allOccupied);
     if (moves&(board.piece[enemy][BISHOP]|board.piece[enemy][QUEEN])) return true;
-    moves= rookAttackRay(sq,board.allOccupied);
+    moves= rookAttacks(sq,board.allOccupied);
     if (moves&(board.piece[enemy][ROOK]|board.piece[enemy][QUEEN])) return true;
     return false;
 }
@@ -557,7 +914,7 @@ void generateMoves(Board& board) {
     while (bishops) {
         int from=__builtin_ctzll(bishops);
         bishops&=bishops-1;
-        U64 moves = bishopAttackRay(from,board.allOccupied) & notOwn;
+        U64 moves = bishopAttacks(from,board.allOccupied) & notOwn;
         while (moves) {
             int to=__builtin_ctzll(moves);
             moves&=moves-1;
@@ -569,7 +926,7 @@ void generateMoves(Board& board) {
     while (rooks) {
         int from=__builtin_ctzll(rooks);
         rooks&=rooks-1;
-        U64 moves = rookAttackRay(from,board.allOccupied) & notOwn;
+        U64 moves = rookAttacks(from,board.allOccupied) & notOwn;
         while (moves) {
             int to=__builtin_ctzll(moves);
             moves&=moves-1;
@@ -581,7 +938,7 @@ void generateMoves(Board& board) {
     while (queens) {
         int from=__builtin_ctzll(queens);
         queens&=queens-1;
-        U64 moves = (rookAttackRay(from,board.allOccupied)|bishopAttackRay(from,board.allOccupied)) & notOwn;
+        U64 moves = (rookAttacks(from,board.allOccupied)|bishopAttacks(from,board.allOccupied)) & notOwn;
         while (moves) {
             int to=__builtin_ctzll(moves);
             moves&=moves-1;
@@ -650,11 +1007,14 @@ int main() {
     ios_base::sync_with_stdio(false);
     cin.tie(nullptr);
     initAttacks();
+    initMagic();
     auto start=chrono::high_resolution_clock::now();
     Board board;
-    board.setFen("rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8  ");
-    cout << perft(board,5) << '\n';
+    long long ans=perft(board,6);
+    cout << ans << '\n';
     auto end=chrono::high_resolution_clock::now();
     chrono::duration<double,milli> elapsed=end-start;
+    long long speed=(long long)((double)ans/elapsed.count());
     cout << "Time Elapsed: " << elapsed.count() << "ms\n";
+    cout << "Speed: " << speed*1000 << "NPS\n";
 }

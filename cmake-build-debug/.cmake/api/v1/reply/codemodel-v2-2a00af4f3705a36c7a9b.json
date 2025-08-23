@@ -6,7 +6,7 @@
 			[
 				{
 					"build" : ".",
-					"jsonFile" : "directory-.-Release-d0094a50bb2071803777.json",
+					"jsonFile" : "directory-.-Debug-d0094a50bb2071803777.json",
 					"minimumCMakeVersion" : 
 					{
 						"string" : "3.30"
@@ -19,7 +19,7 @@
 					]
 				}
 			],
-			"name" : "Release",
+			"name" : "Debug",
 			"projects" : 
 			[
 				{
@@ -39,7 +39,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "ChessEngine::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-ChessEngine-Release-1e689c2077af78ca2c1e.json",
+					"jsonFile" : "target-ChessEngine-Debug-07d85faae415f1949b6e.json",
 					"name" : "ChessEngine",
 					"projectIndex" : 0
 				}
@@ -49,7 +49,7 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "C:/Users/MSi/CLionProjects/Chussy/cmake-build-release",
+		"build" : "C:/Users/MSi/CLionProjects/Chussy/cmake-build-debug",
 		"source" : "C:/Users/MSi/CLionProjects/Chussy"
 	},
 	"version" : 

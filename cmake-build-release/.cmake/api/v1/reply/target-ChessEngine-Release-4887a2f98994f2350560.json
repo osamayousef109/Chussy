@@ -121,7 +121,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "bitboards.cpp",
+			"path" : "magic.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],
