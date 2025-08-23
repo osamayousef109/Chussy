@@ -1,5 +1,10 @@
 # ninja log v6
-1	189	7776551102632918	build.ninja	acab75f62850a6d3
-3	49	7775690768125088	CMakeFiles/ChessEngine.dir/main.cpp.obj	90c3b0c55e75d50d
-7	700	7775690768155075	CMakeFiles/ChessEngine.dir/bitboards.cpp.obj	8b5b0f65380d0d60
-701	763	7775690775093127	ChessEngine.exe	8b9e36b0f6a80d21
+2	194	7776729821242886	build.ninja	acab75f62850a6d3
+3	345	7776720088241847	CMakeFiles/ChessEngine.dir/move.cpp.obj	89af1cfc26c005ff
+3	356	7776720204349124	CMakeFiles/ChessEngine.dir/bitboards.cpp.obj	26d56f1fb3ba27a9
+3	367	7776719591080954	CMakeFiles/ChessEngine.dir/main.cpp.obj	a65b1343601ccb12
+7	320	7776720088281858	CMakeFiles/ChessEngine.dir/movegen.cpp.obj	f33308021c75dc50
+356	419	7776720207882968	ChessEngine.exe	ff5abc74e6d9c74e
+17	402	7776719591220975	CMakeFiles/ChessEngine.dir/test.cpp.obj	8832710cc3d706
+9	111	7776719591140948	CMakeFiles/ChessEngine.dir/attacks.cpp.obj	6b95e9157796e36b
+2	191	7776729821242886	build.ninja	acab75f62850a6d3

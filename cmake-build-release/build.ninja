@@ -51,13 +51,37 @@ build cmake_object_order_depends_target_ChessEngine: phony || .
 
 build CMakeFiles/ChessEngine.dir/main.cpp.obj: CXX_COMPILER__ChessEngine_unscanned_Release C$:/Users/MSi/CLionProjects/Chussy/main.cpp || cmake_object_order_depends_target_ChessEngine
   DEP_FILE = CMakeFiles\ChessEngine.dir\main.cpp.obj.d
-  FLAGS = -O3 -DNDEBUG -std=gnu++20 -fdiagnostics-color=always -O3 -march=native
+  FLAGS = -O3 -DNDEBUG -std=gnu++20 -fdiagnostics-color=always -O3 -march=native -fno-exceptions -DNDEBUG
   OBJECT_DIR = CMakeFiles\ChessEngine.dir
   OBJECT_FILE_DIR = CMakeFiles\ChessEngine.dir
 
-build CMakeFiles/ChessEngine.dir/magic.cpp.obj: CXX_COMPILER__ChessEngine_unscanned_Release C$:/Users/MSi/CLionProjects/Chussy/magic.cpp || cmake_object_order_depends_target_ChessEngine
-  DEP_FILE = CMakeFiles\ChessEngine.dir\magic.cpp.obj.d
-  FLAGS = -O3 -DNDEBUG -std=gnu++20 -fdiagnostics-color=always -O3 -march=native
+build CMakeFiles/ChessEngine.dir/bitboards.cpp.obj: CXX_COMPILER__ChessEngine_unscanned_Release C$:/Users/MSi/CLionProjects/Chussy/bitboards.cpp || cmake_object_order_depends_target_ChessEngine
+  DEP_FILE = CMakeFiles\ChessEngine.dir\bitboards.cpp.obj.d
+  FLAGS = -O3 -DNDEBUG -std=gnu++20 -fdiagnostics-color=always -O3 -march=native -fno-exceptions -DNDEBUG
+  OBJECT_DIR = CMakeFiles\ChessEngine.dir
+  OBJECT_FILE_DIR = CMakeFiles\ChessEngine.dir
+
+build CMakeFiles/ChessEngine.dir/attacks.cpp.obj: CXX_COMPILER__ChessEngine_unscanned_Release C$:/Users/MSi/CLionProjects/Chussy/attacks.cpp || cmake_object_order_depends_target_ChessEngine
+  DEP_FILE = CMakeFiles\ChessEngine.dir\attacks.cpp.obj.d
+  FLAGS = -O3 -DNDEBUG -std=gnu++20 -fdiagnostics-color=always -O3 -march=native -fno-exceptions -DNDEBUG
+  OBJECT_DIR = CMakeFiles\ChessEngine.dir
+  OBJECT_FILE_DIR = CMakeFiles\ChessEngine.dir
+
+build CMakeFiles/ChessEngine.dir/move.cpp.obj: CXX_COMPILER__ChessEngine_unscanned_Release C$:/Users/MSi/CLionProjects/Chussy/move.cpp || cmake_object_order_depends_target_ChessEngine
+  DEP_FILE = CMakeFiles\ChessEngine.dir\move.cpp.obj.d
+  FLAGS = -O3 -DNDEBUG -std=gnu++20 -fdiagnostics-color=always -O3 -march=native -fno-exceptions -DNDEBUG
+  OBJECT_DIR = CMakeFiles\ChessEngine.dir
+  OBJECT_FILE_DIR = CMakeFiles\ChessEngine.dir
+
+build CMakeFiles/ChessEngine.dir/movegen.cpp.obj: CXX_COMPILER__ChessEngine_unscanned_Release C$:/Users/MSi/CLionProjects/Chussy/movegen.cpp || cmake_object_order_depends_target_ChessEngine
+  DEP_FILE = CMakeFiles\ChessEngine.dir\movegen.cpp.obj.d
+  FLAGS = -O3 -DNDEBUG -std=gnu++20 -fdiagnostics-color=always -O3 -march=native -fno-exceptions -DNDEBUG
+  OBJECT_DIR = CMakeFiles\ChessEngine.dir
+  OBJECT_FILE_DIR = CMakeFiles\ChessEngine.dir
+
+build CMakeFiles/ChessEngine.dir/test.cpp.obj: CXX_COMPILER__ChessEngine_unscanned_Release C$:/Users/MSi/CLionProjects/Chussy/test.cpp || cmake_object_order_depends_target_ChessEngine
+  DEP_FILE = CMakeFiles\ChessEngine.dir\test.cpp.obj.d
+  FLAGS = -O3 -DNDEBUG -std=gnu++20 -fdiagnostics-color=always -O3 -march=native -fno-exceptions -DNDEBUG
   OBJECT_DIR = CMakeFiles\ChessEngine.dir
   OBJECT_FILE_DIR = CMakeFiles\ChessEngine.dir
 
@@ -69,7 +93,7 @@ build CMakeFiles/ChessEngine.dir/magic.cpp.obj: CXX_COMPILER__ChessEngine_unscan
 #############################################
 # Link the executable ChessEngine.exe
 
-build ChessEngine.exe: CXX_EXECUTABLE_LINKER__ChessEngine_Release CMakeFiles/ChessEngine.dir/main.cpp.obj CMakeFiles/ChessEngine.dir/magic.cpp.obj
+build ChessEngine.exe: CXX_EXECUTABLE_LINKER__ChessEngine_Release CMakeFiles/ChessEngine.dir/main.cpp.obj CMakeFiles/ChessEngine.dir/bitboards.cpp.obj CMakeFiles/ChessEngine.dir/attacks.cpp.obj CMakeFiles/ChessEngine.dir/move.cpp.obj CMakeFiles/ChessEngine.dir/movegen.cpp.obj CMakeFiles/ChessEngine.dir/test.cpp.obj
   FLAGS = -O3 -DNDEBUG
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\ChessEngine.dir
