@@ -24,7 +24,7 @@ inline uint64_t random_uint64() {
 
 inline SMagic mBishopTbl[64];
 inline SMagic mRookTbl[64];
-constexpr U64 bishopAttacks(int sq,U64 occ) {
+inline U64 bishopAttacks(int sq,U64 occ) {
     U64* aptr = mBishopTbl[sq].ptr;
     occ      &= mBishopTbl[sq].mask;
     occ      *= mBishopTbl[sq].magic;
@@ -32,7 +32,7 @@ constexpr U64 bishopAttacks(int sq,U64 occ) {
     return aptr[occ];
 }
 
-constexpr U64 rookAttacks(int sq,U64 occ) {
+inline U64 rookAttacks(int sq,U64 occ) {
     U64* aptr = mRookTbl[sq].ptr;
     occ      &= mRookTbl[sq].mask;
     occ      *= mRookTbl[sq].magic;

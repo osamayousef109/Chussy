@@ -70982,7 +70982,7 @@ inline uint64_t random_uint64() {
 
 inline SMagic mBishopTbl[64];
 inline SMagic mRookTbl[64];
-constexpr U64 bishopAttacks(int sq,U64 occ) {
+inline U64 bishopAttacks(int sq,U64 occ) {
     U64* aptr = mBishopTbl[sq].ptr;
     occ &= mBishopTbl[sq].mask;
     occ *= mBishopTbl[sq].magic;
@@ -70990,7 +70990,7 @@ constexpr U64 bishopAttacks(int sq,U64 occ) {
     return aptr[occ];
 }
 
-constexpr U64 rookAttacks(int sq,U64 occ) {
+inline U64 rookAttacks(int sq,U64 occ) {
     U64* aptr = mRookTbl[sq].ptr;
     occ &= mRookTbl[sq].mask;
     occ *= mRookTbl[sq].magic;
@@ -71228,9 +71228,8 @@ int main() {
     initMagic();
     auto start= std::chrono::high_resolution_clock::now();
     Board board;
-    board.setFen("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1 ");
     board.initZobrist();
-    long long ans=perft(board,8);
+    long long ans=perft(board,7);
     std::cout << ans << '\n';
     auto end= std::chrono::high_resolution_clock::now();
     std::chrono::duration<double, std::milli> elapsed=end-start;
